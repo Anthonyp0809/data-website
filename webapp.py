@@ -8,40 +8,43 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    skyscrapers = get_skyscrapers()
-    return render_template('index.html', skyscrapers=skyscrapers)
+    years1 = get_years()
+    return render_template('index.html', years=years1)
 
 
 @app.route('/showFact')
 def render_fact():
-    skyscrapers = get_skyscrapers()
-    skyscraper = request.args.get('skyscraper')
-    year = skyscraper_built_in(skyscraper)
-    fact = skyscraper + " was built in the year " + year + "."
-    return render_template('index.html', skyscraperss=skyscrapers, funFact=fact)
+    years = get_years()
+    year = request.args.get('yearDropdown')
+    skyscraper = skyscraper_built_in(year)
+    fact = str(skyscraper) + " was built in the year " + str(year) + "."
+    return render_template('index.html', years=years, funFact=fact)
     
     
-def get_skyscrapers():
+def get_years():
     """Return a list of state abbreviations from the demographic data."""
-with open('skyscrapers.json') as skyscrapers_data:
-    years = json.load(skyscrapers_data)
-    #states=[]
-    #for c in counties:
-        #if c["State"] not in states:
-            #states.append(c["State"])
+    with open('skyscrapers.json') as skyscrapers_data:
+        years = json.load(skyscrapers_data)
+    skyscrapers=[]
+    for y in years:
+        if y["status"]["completed"]["year"] not in skyscrapers:
+            skyscrapers.append(y["status"]["completed"]["year"])
     #a more concise but less flexible and less easy to read version is below.
-    skyscrapers=list(set([y["Skyscraper"] for y in years])) #sets do not allow duplicates and the set function is optimized for removing duplicates
+    # skyscrapers=list(set([y["Skyscraper"] for y in years])) #sets do not allow duplicates and the set function is optimized for removing duplicates
     return skyscrapers
 
 
-def skyscraper_built_in(skyscraper):
+def skyscraper_built_in(inputYear):
     """Return the name of a county in the given state with the highest percent of under 18 year olds."""
-with open('skyscrapers.json') as skyscrapers_data:
- years = json.load(skyscrapers_data)
- year = ""
- year = y["Year"]
- return year
+    with open('skyscrapers.json') as skyscrapers_data:
+        years = json.load(skyscrapers_data)
     
+    
+    for y in years:
+        print(y)
+        if int(y["status"]["completed"]["year"]) == int(inputYear):
+            return y["name"]
+    1
 def is_localhost():
     """ Determines if app is running on localhost or not
     Adapted from: https://stackoverflow.com/questions/17077863/how-to-see-if-a-flask-app-is-being-run-on-localhost
