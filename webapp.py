@@ -6,6 +6,7 @@ import json
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def home():
     years1 = get_years()
@@ -19,8 +20,9 @@ def render_fact():
     skyscraper = skyscraper_built_in(year)
     fact = str(skyscraper) + " was built in the year " + str(year) + "."
     return render_template('index.html', years=years, funFact=fact)
-    
-    
+@app.route('/decades')
+def render_decades():
+    return render_template('decades.html')
 def get_years():
     """Return a list of state abbreviations from the demographic data."""
     with open('skyscrapers.json') as skyscrapers_data:
@@ -44,7 +46,7 @@ def skyscraper_built_in(inputYear):
         print(y)
         if int(y["status"]["completed"]["year"]) == int(inputYear):
             return y["name"]
-    1
+    
 def is_localhost():
     """ Determines if app is running on localhost or not
     Adapted from: https://stackoverflow.com/questions/17077863/how-to-see-if-a-flask-app-is-being-run-on-localhost
