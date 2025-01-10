@@ -20,32 +20,60 @@ def render_fact():
     skyscraper = skyscraper_built_in(year)
     fact = str(skyscraper) + " was built in the year " + str(year) + "."
     return render_template('index.html', years=years, funFact=fact)
+
 @app.route('/decades')
 def render_decades():
-    return render_template('decades.html')
+    decades = get_building_decade_count()
+    graph_points = format_dict_as_graph_points(decades)
+    return render_template('decades.html', points=graph_points)
+    
+def get_building_decade_count():
+    """return a dictionary with format 
+    {"1850's":1...}"""
+    years = get_years()
+    decade_count = {}
+    for year in years:
+        decade = str (year)[:-1]  + "0's"
+        if decade in decade_count:
+            decade_count [decade] += 1
+        else:
+            decade_count [decade] = 1
+    return decade_count
+    
+def format_dict_as_graph_points(data):
+    graph_points = ""
+    for key in data:
+        graph_points += Markup('{y: ' + str(data[key]) + ', label: "' + key + '"}, ')
+    graph_points = graph_points[:-2]
+    print(graph_points)
+    return graph_points
+    
 def get_years():
     """Return a list of state abbreviations from the demographic data."""
     with open('skyscrapers.json') as skyscrapers_data:
-        years = json.load(skyscrapers_data)
-    skyscrapers=[]
-    for y in years:
-        if y["status"]["completed"]["year"] not in skyscrapers:
-            skyscrapers.append(y["status"]["completed"]["year"])
+        buildings = json.load(skyscrapers_data)
+    years=[]
+    for building in buildings:
+        year = building["status"]["completed"]["year"]
+        if year != 0:
+            years.append(year)
     #a more concise but less flexible and less easy to read version is below.
     # skyscrapers=list(set([y["Skyscraper"] for y in years])) #sets do not allow duplicates and the set function is optimized for removing duplicates
-    return skyscrapers
+    years.sort()
+    return years
 
+def get_years_set():
+    return list(set(get_years()))
 
 def skyscraper_built_in(inputYear):
     """Return the name of a county in the given state with the highest percent of under 18 year olds."""
     with open('skyscrapers.json') as skyscrapers_data:
-        years = json.load(skyscrapers_data)
+        buildings = json.load(skyscrapers_data)
     
     
-    for y in years:
-        print(y)
-        if int(y["status"]["completed"]["year"]) == int(inputYear):
-            return y["name"]
+    for building in buildings:
+        if int(building["status"]["completed"]["year"]) == int(inputYear):
+            return building["name"]
     
 def is_localhost():
     """ Determines if app is running on localhost or not
